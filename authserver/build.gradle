@@ -1,32 +1,22 @@
-buildscript {
-     repositories {
-        mavenCentral()
-     }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.2.2.RELEASE")
-    }
-}
-
-// apply plugin: 'java'
-// apply plugin: 'eclipse'
-// apply plugin: 'idea'
 apply plugin: 'spring-boot'
+apply plugin: 'net.saliman.properties'
 
 jar {
     baseName = 'authserver'
     version =  '0.1.0'
 }
 
-dependencies {
-    // tag::jetty[]
-    compile("org.springframework.boot:spring-boot-starter-web")
-    compile("org.springframework.boot:spring-boot-starter-tomcat")
-    compile("org.springframework.boot:spring-boot-starter-actuator")
-    // end::actuator[]
-    testCompile("junit:junit")
-    testCompile("org.springframework.boot:spring-boot-starter-test")
+
+/* task wrapper(type: Wrapper) {
+    gradleVersion = '1.11'
+} */
+
+task prep(type: Copy) {
+    //requiredProperties "applicationLogDir", "logfileName", "defaultLogLevel"
+    from 'templates'
+    include 'application.properties'
+    into 'src/main/resources'
+    filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: project.filterTokens)
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '1.11'
-}
+compileJava.dependsOn prep
