@@ -16,19 +16,29 @@
 
 package core.september.cloudconf.authserver;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import javax.servlet.*;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import core.september.cloudconf.authserver.filter.JWTFilter;
+import core.september.cloudconf.authserver.service.JWTService;
+import core.september.cloudconf.authserver.service.LogService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
+
 
 @SpringBootApplication
-public class SampleTomcatApplication {
+@EnableAsync
+public class AuthServer {
 
-	private static Log logger = LogFactory.getLog(SampleTomcatApplication.class);
+    @Autowired
+    LogService logService;
+
+    @Autowired
+    JWTService service;
+	//private static Log logger = LogFactory.getLog(AuthServer.class);
 
 	@Bean
 	protected ServletContextListener listener() {
@@ -36,19 +46,27 @@ public class SampleTomcatApplication {
 
 			@Override
 			public void contextInitialized(ServletContextEvent sce) {
-				logger.info("ServletContext initialized");
+				logService.getLogger(getClass()).info("ServletContext initialized");
 			}
 
 			@Override
 			public void contextDestroyed(ServletContextEvent sce) {
-				logger.info("ServletContext destroyed");
+                logService.getLogger(getClass()).info("ServletContext destroyed");
 			}
 
 		};
 	}
 
+    @Bean
+    public FilterRegistrationBean jwtFilter() {
+        Filter filter = new JWTFilter(service);
+        FilterRegistrationBean bean = new FilterRegistrationBean();
+        bean.setFilter(filter);
+        return bean;
+    }
+
 	public static void main(String[] args) throws Exception {
-		SpringApplication.run(SampleTomcatApplication.class, args);
+		SpringApplication.run(AuthServer.class, args);
 	}
 
 }

@@ -24,6 +24,9 @@ subprojects {
         compile("org.springframework.boot:spring-boot-starter-web")
         compile("org.springframework.boot:spring-boot-starter-tomcat")
         compile("org.springframework.boot:spring-boot-starter-actuator")
+        compile('com.auth0:java-jwt:2.0.1')
+        compile('com.google.code.gson:gson:2.3.1')
+        compile('com.google.guava:guava:18.0')
         // end::actuator[]
         testCompile("junit:junit")
         testCompile("org.springframework.boot:spring-boot-starter-test")

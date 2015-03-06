@@ -16,16 +16,21 @@
 
 package core.september.cloudconf.authserver;
 
+import core.september.cloudconf.authserver.conf.AppConfig;
+import core.september.cloudconf.authserver.service.JWTService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -35,7 +40,7 @@ import static org.junit.Assert.assertEquals;
  * @author Dave Syer
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = SampleTomcatApplication.class)
+@SpringApplicationConfiguration(classes = AuthServer.class)
 @WebIntegrationTest(randomPort = true)
 @DirtiesContext
 public class SampleTomcatApplicationTests {
@@ -43,12 +48,36 @@ public class SampleTomcatApplicationTests {
 	@Value("${local.server.port}")
 	private int port;
 
-	@Test
+    @Autowired
+    JWTService jwtService;
+
+	//@Test
 	public void testHome() throws Exception {
 		ResponseEntity<String> entity = new TestRestTemplate().getForEntity(
 				"http://localhost:" + this.port, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("Hello World", entity.getBody());
 	}
+
+    @Test
+    public void testHomeWithHeade() throws Exception {
+        HttpHeaders header = new HttpHeaders();
+        Map<String,Object> claim = new HashMap<String,Object>();
+        claim.put("Pippo","Ciao");
+        claim.put("Pluto","Miao");
+        String auth = jwtService.longSign(claim);
+        header.add(AppConfig.AUTH_HEADER,auth);
+
+        ResponseEntity<String> entity = new TestRestTemplate().exchange(
+                "http://localhost:" + this.port,
+                HttpMethod.GET,
+                new HttpEntity<byte[]>(header),
+                String.class);
+
+        assertEquals(HttpStatus.OK, entity.getStatusCode());
+        assertEquals("Hello World", entity.getBody());
+    }
+
+
 
 }
