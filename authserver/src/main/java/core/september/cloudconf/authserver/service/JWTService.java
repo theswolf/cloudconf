@@ -13,7 +13,7 @@ import java.security.SignatureException;
 import java.util.Map;
 
 @Service
-public class JWTService {
+public class JWTService  {
     private JWTVerifier verifier;
     private JWTSigner signer;
     private JWTSigner.Options shortOption;
